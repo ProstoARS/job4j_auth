@@ -28,13 +28,14 @@ public class PersonService {
 
     @Transactional
     public boolean update(Person person) {
+        boolean result = false;
         try {
             personRepository.saveAndFlush(person);
+            result = true;
         } catch (Exception e) {
              log.error("Ошибка обновления", e);
-            return false;
         }
-        return true;
+        return result;
     }
 
     @Transactional
@@ -51,4 +52,5 @@ public class PersonService {
     public Person create(Person person) {
         return personRepository.save(person);
     }
+
 }
