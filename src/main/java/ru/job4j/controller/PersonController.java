@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.domain.Person;
 import ru.job4j.service.PersonService;
@@ -16,6 +17,7 @@ import java.util.List;
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
+    private final BCryptPasswordEncoder encoder;
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(Exception.class)
@@ -39,8 +41,9 @@ public class PersonController {
         );
     }
 
-    @PostMapping("/")
+    @PostMapping("/sign-up")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        person.setPassword(this.encoder.encode(person.getPassword()));
         return new ResponseEntity<>(
                 this.personService.create(person),
                 HttpStatus.CREATED
