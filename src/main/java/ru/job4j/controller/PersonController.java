@@ -25,7 +25,7 @@ public class PersonController {
         log.error("Ошибка сохранения объекта", exception);
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<Person> findAll() {
         return this.personService.findAll();
     }
