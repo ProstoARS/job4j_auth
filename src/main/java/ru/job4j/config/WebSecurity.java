@@ -32,6 +32,7 @@ public class WebSecurity {
                 .authorizeHttpRequests(urlConfig -> urlConfig
                         .requestMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
                         .requestMatchers(HttpMethod.GET, "/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/testExceptionHandler").permitAll()
                         .anyRequest().authenticated());
         http
                 .addFilter(new JWTAuthenticationFilter(authenticationManager));

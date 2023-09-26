@@ -29,11 +29,14 @@ public class PersonService {
     @Transactional
     public boolean update(Person person) {
         boolean result = false;
-        try {
-            personRepository.saveAndFlush(person);
-            result = true;
-        } catch (Exception e) {
-             log.error("Ошибка обновления", e);
+        Optional<Person> byId = personRepository.findById(person.getId());
+        if (byId.isPresent()) {
+            try {
+                personRepository.saveAndFlush(person);
+                result = true;
+            } catch (Exception e) {
+                log.error("Ошибка обновления", e);
+            }
         }
         return result;
     }
