@@ -3,6 +3,7 @@ package ru.job4j.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -45,30 +46,30 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@PathVariable int id) {
+    public Person findById(@PathVariable int id) {
         var person = this.personService.findById(id);
         if (person.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не был найден!");
         }
-        return new ResponseEntity<>(person.get(), HttpStatus.OK);
+        return person.get();
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<Person> create(@RequestBody Person person) {
         person.setPassword(this.encoder.encode(person.getPassword()));
-        return new ResponseEntity<>(
-                this.personService.create(person),
-                HttpStatus.CREATED
-        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Person created", person.getLogin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(personService.create(person));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
+    public Person update(@RequestBody Person person) {
         person.setPassword(this.encoder.encode(person.getPassword()));
         if (!personService.update(person)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не удалось обновить!");
         }
-        return ResponseEntity.ok().build();
+        return person;
     }
 
     @DeleteMapping("/delete/{id}")
