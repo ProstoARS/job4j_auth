@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Person;
+import ru.job4j.dto.PersonUpdateDTO;
+import ru.job4j.dto.PersonUpdatePasswordDTO;
 import ru.job4j.exceprions.BusinessException;
 import ru.job4j.exceprions.Response;
 import ru.job4j.service.PersonService;
@@ -23,7 +24,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
-    private final BCryptPasswordEncoder encoder;
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Response> handleException(BusinessException e) {
@@ -56,7 +56,6 @@ public class PersonController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<Person> create(@RequestBody Person person) {
-        person.setPassword(this.encoder.encode(person.getPassword()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Person created", person.getLogin())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -64,12 +63,16 @@ public class PersonController {
     }
 
     @PutMapping("/update")
-    public Person update(@RequestBody Person person) {
-        person.setPassword(this.encoder.encode(person.getPassword()));
-        if (!personService.update(person)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не удалось обновить!");
-        }
-        return person;
+    public Person update(@RequestBody PersonUpdateDTO updateDTO) {
+        return personService.update(updateDTO).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не удалось обновить!")
+        );
+    }
+
+    @PatchMapping
+    public Person updatePassword(@RequestBody PersonUpdatePasswordDTO personDTO) {
+        return personService.changePassword(personDTO)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found!"));
     }
 
     @DeleteMapping("/delete/{id}")
