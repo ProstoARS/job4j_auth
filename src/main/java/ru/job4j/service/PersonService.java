@@ -60,7 +60,7 @@ public class PersonService {
     @Transactional
     public Optional<Person> changePassword(PersonUpdatePasswordDTO personDTO) {
         Optional<Person> personById = personRepository.findById(personDTO.id());
-        return personById.stream().findFirst().map(person -> {
+        return personById.map(person -> {
             person.setPassword(this.encoder.encode(personDTO.password()));
             return person;
         });
